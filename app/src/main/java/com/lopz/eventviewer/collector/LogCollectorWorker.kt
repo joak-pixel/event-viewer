@@ -96,9 +96,11 @@ class LogCollectorWorker(
             val lines = process.inputStream.bufferedReader().readLines()
 
             val oomLines = lines.filter {
-                it.contains("Low on memory", ignoreCase = true) ||
-                        it.contains("lowmemorykiller", ignoreCase = true) ||
-                        it.contains("Out of memory", ignoreCase = true)
+                // Solo nos interesa cuando el sistema MATÓ un proceso por falta de memoria,
+                // no cuando simplemente avisa que la memoria está baja (eso es ruido normal)
+                it.contains("lowmemorykiller: Killing", ignoreCase = true) ||
+                        it.contains("Killed process", ignoreCase = true) ||
+                        (it.contains("Out of memory", ignoreCase = true) && it.contains("kill", ignoreCase = true))
             }
 
             for (line in oomLines) {
@@ -108,7 +110,8 @@ class LogCollectorWorker(
                         category = EventCategory.OUT_OF_MEMORY,
                         severity = EventSeverity.ERROR,
                         processName = extractProcessName(line),
-                        title = "Posible evento de memoria baja (OOM)",
+                        title = extractProcessName(line)?.let { "OOM: se cerró $it por falta de memoria" }
+                            ?: "Proceso cerrado por falta de memoria (OOM)",
                         rawDetails = line,
                         source = "logcat"
                     )
@@ -222,6 +225,10 @@ class LogCollectorWorker(
 
 
     private fun extractProcessName(text: String): String? {
+        // Patrón específico de lowmemorykiller/OOM: Killing 'com.example.app' (pid 1234)...
+        val oomRegex = Regex("""[Kk]ill(?:ing|ed process)?\s*'?([\w.]+)'?\s*\(?pid""")
+        oomRegex.find(text)?.groupValues?.getOrNull(1)?.let { return it }
+
         // Busca patrones comunes tipo "Process: com.example.app" o "pid: 1234, ProcessName: com.example.app"
         val processRegex = Regex("""Process(?:Name)?[:\s]+([\w.]+)""")
         return processRegex.find(text)?.groupValues?.getOrNull(1)
