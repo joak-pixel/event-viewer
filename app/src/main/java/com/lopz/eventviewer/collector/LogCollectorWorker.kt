@@ -128,11 +128,7 @@ class LogCollectorWorker(
     private fun classifyEntry(tag: String, text: String, timestamp: Long): SystemEvent {
         val (category, severity, title) = when (tag) {
             "SYSTEM_LAST_KMSG" -> classifyKernelLog(text)
-            "SYSTEM_TOMBSTONE" -> Triple(
-                EventCategory.NATIVE_CRASH,
-                EventSeverity.ERROR,
-                "Crash nativo detectado"
-            )
+            "SYSTEM_TOMBSTONE" -> classifyTombstone(text)
             "system_app_crash" -> Triple(
                 EventCategory.APP_CRASH,
                 EventSeverity.ERROR,
@@ -191,6 +187,25 @@ class LogCollectorWorker(
                 Triple(EventCategory.UNKNOWN, EventSeverity.INFO, "Reinicio: $reason")
         }
     }
+
+    /**
+     * SYSTEM_TOMBSTONE agrupa crashes nativos de todo tipo. El caso "TimeCheck timeout"
+     * es particular: no es un bug de memoria ni un crash real de la app, sino el watchdog
+     * interno de audioserver matando un hilo que tardó demasiado (común en HALs de audio
+     * MediaTek al cambiar de ruta de audio, activar Bluetooth, etc.).
+     */
+    private fun classifyTombstone(text: String): Triple<EventCategory, EventSeverity, String> {
+        return if (text.contains("TimeCheck timeout", ignoreCase = true)) {
+            Triple(
+                EventCategory.AUDIO_TIMEOUT,
+                EventSeverity.WARNING,
+                "Timeout del subsistema de audio (TimeCheck)"
+            )
+        } else {
+            Triple(EventCategory.NATIVE_CRASH, EventSeverity.ERROR, "Crash nativo detectado")
+        }
+    }
+
 
     private fun extractProcessName(text: String): String? {
         // Busca patrones comunes tipo "Process: com.example.app" o "pid: 1234, ProcessName: com.example.app"

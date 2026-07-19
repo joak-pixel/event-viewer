@@ -11,6 +11,7 @@ enum class EventCategory {
     APP_CRASH,          // system_app_crash - una app se cerró de golpe
     APP_ANR,            // system_app_anr - una app dejó de responder
     NATIVE_CRASH,       // SYSTEM_TOMBSTONE - crash a nivel nativo (C/C++)
+    AUDIO_TIMEOUT,      // TimeCheck timeout del audioserver - HAL de audio tardó demasiado
     WATCHDOG_RESET,     // reinicio forzado por watchdog del sistema
     UNKNOWN
 }
