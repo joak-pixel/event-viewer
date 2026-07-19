@@ -96,11 +96,12 @@ class LogCollectorWorker(
             val lines = process.inputStream.bufferedReader().readLines()
 
             val oomLines = lines.filter {
-                // Solo nos interesa cuando el sistema MATÓ un proceso por falta de memoria,
-                // no cuando simplemente avisa que la memoria está baja (eso es ruido normal)
+                // "Killed process" es DEMASIADO genérico: Android lo usa también para su
+                // limpieza rutinaria de apps en background (gestión normal de caché, no
+                // necesariamente falta real de memoria). Nos quedamos solo con la señal
+                // específica del kernel, que sí indica presión de memoria real.
                 it.contains("lowmemorykiller: Killing", ignoreCase = true) ||
-                        it.contains("Killed process", ignoreCase = true) ||
-                        (it.contains("Out of memory", ignoreCase = true) && it.contains("kill", ignoreCase = true))
+                        it.contains("Out of memory: Kill process", ignoreCase = true)
             }
 
             for (line in oomLines) {
