@@ -90,22 +90,21 @@ class LogCollectorWorker(
     private fun collectFromLogcat(): List<SystemEvent> {
         val results = mutableListOf<SystemEvent>()
         try {
+            // -v time agrega fecha/hora al inicio de cada línea (ej: "07-12 15:23:54.896 ...")
             // -d = dump y salir (no queda escuchando). -b all = todos los buffers disponibles.
-            val process = Runtime.getRuntime().exec(arrayOf("logcat", "-d", "-b", "all"))
+            val process = Runtime.getRuntime().exec(arrayOf("logcat", "-d", "-v", "time", "-b", "all"))
             val lines = process.inputStream.bufferedReader().readLines()
 
-            // Buscamos líneas que indiquen OOM killer actuando, que es lo que pediste
-            // como caso principal (freezes por RAM)
             val oomLines = lines.filter {
                 it.contains("Low on memory", ignoreCase = true) ||
-                it.contains("lowmemorykiller", ignoreCase = true) ||
-                it.contains("Out of memory", ignoreCase = true)
+                        it.contains("lowmemorykiller", ignoreCase = true) ||
+                        it.contains("Out of memory", ignoreCase = true)
             }
 
             for (line in oomLines) {
                 results.add(
                     SystemEvent(
-                        timestamp = System.currentTimeMillis(), // logcat no da epoch directo del año actual sin parseo extra
+                        timestamp = parseLogcatTimestamp(line),
                         category = EventCategory.OUT_OF_MEMORY,
                         severity = EventSeverity.ERROR,
                         processName = extractProcessName(line),
@@ -119,6 +118,21 @@ class LogCollectorWorker(
             // Si falla logcat, no rompemos toda la recolección; DropBox sigue siendo la fuente principal
         }
         return results
+    }
+
+    /**
+     * logcat -v time da formato "MM-dd HH:mm:ss.SSS" sin año (ej: "07-12 15:23:54.896").
+     * Le agregamos el año actual, ya que logcat no lo incluye.
+     */
+    private fun parseLogcatTimestamp(line: String): Long {
+        return try {
+            val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+            val datePart = line.substring(0, 18) // "MM-dd HH:mm:ss.SSS" son 18 caracteres
+            val format = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", java.util.Locale.getDefault())
+            format.parse("$currentYear-$datePart")?.time ?: System.currentTimeMillis()
+        } catch (e: Exception) {
+            System.currentTimeMillis() // si el parseo falla, mejor una fecha aproximada que romper la recolección
+        }
     }
 
     /**
