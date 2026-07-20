@@ -22,8 +22,8 @@
 Cuando tu Android "se pone lento" o se congela, algo está pasando bajo el capó. Esta app captura ese "algo" — eventos del sistema, crasheos, comportamientos extraños — para que puedas entender realmente qué está sucediendo.
 
 > **ℹ️ Nota importante**: 
-> - Esta aplicación fue **desarrollada y optimizada específicamente para Moto G60s (Lisbon)**, pero puede ser adaptada y utilizada como base conceptual para otros dispositivos
-> - Es un proyecto hecho **100% por vibe codeado** — desarrollado por curiosidad pura, sin planes comerciales
+> - Esta aplicación fue **desarrollada y optimizada específicamente para Moto G60s (bootloader desbloqueado) (Lisbon)**, pero puede ser adaptada y utilizada como base conceptual para otros dispositivos
+> - Es un proyecto hecho **100% vibe codeado** — desarrollado por curiosidad pura.
 
 ---
 
