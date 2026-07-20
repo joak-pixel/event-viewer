@@ -5,6 +5,7 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.22-purple?style=for-the-badge&logo=kotlin)](https://kotlinlang.org/)
 [![Android](https://img.shields.io/badge/Android-26%2B-green?style=for-the-badge&logo=android)](https://developer.android.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-%F0%9F%A4%A3%20Side%20Project-orange?style=for-the-badge)](README.md)
 
 **Una herramienta para capturar y entender qué pasa en tu Android cuando todo se congela** 🔍
 
@@ -20,7 +21,9 @@
 
 Cuando tu Android "se pone lento" o se congela, algo está pasando bajo el capó. Esta app captura ese "algo" — eventos del sistema, crasheos, comportamientos extraños — para que puedas entender realmente qué está sucediendo.
 
-> **Nota importante**: Esta aplicación fue **desarrollada y optimizada específicamente para Moto G60s (Lisbon)**, pero puede ser adaptada y utilizada como base conceptual para otros dispositivos y enfoques de monitoreo.
+> **ℹ️ Nota importante**: 
+> - Esta aplicación fue **desarrollada y optimizada específicamente para Moto G60s (Lisbon)**, pero puede ser adaptada y utilizada como base conceptual para otros dispositivos
+> - Es un proyecto hecho **100% por vibe codeado** — desarrollado por curiosidad pura, sin planes comerciales
 
 ---
 
@@ -51,6 +54,7 @@ Event Viewer intenta responder esas preguntas capturando un "registro de vuelo" 
 ✅ Entender comportamientos anómalos del sistema
 ✅ Generar reports para debugging
 ✅ Base para herramientas más complejas de monitoreo
+✅ Aprender cómo funciona el monitoreo de sistemas en Android
 ```
 
 ---
@@ -64,7 +68,7 @@ Event Viewer intenta responder esas preguntas capturando un "registro de vuelo" 
 | **WorkManager** | 2.9.0 | Ejecutar tareas en background sin drenar batería |
 | **LiveData** | 2.7.0 | Reactividad y observadores reactivos |
 | **ViewModel** | 2.7.0 | Gestión inteligente del ciclo de vida |
-| **Android SDK** | 26+ (Moto G60s ready) | Compatible con dispositivos mid-range |
+| **Android SDK** | API 26+ | Compatible con dispositivos mid-range |
 | **Material Design 3** | 1.11.0 | UI moderna y accesible |
 
 ---
@@ -77,7 +81,7 @@ Event Viewer intenta responder esas preguntas capturando un "registro de vuelo" 
 ✓ Android Studio (Flamingo o superior)
 ✓ JDK 17+
 ✓ Gradle 8.3.0
-✓ Un Moto G60s o dispositivo similar (Android 26+)
+✓ Un Moto G60s o dispositivo similar (API 26+)
 ```
 
 ### Pasos
@@ -194,14 +198,15 @@ event-viewer/
 
 ```
 📱 Dispositivo: Moto G60s (Lisbon)
-RAM: 4GB
+RAM: 6GB
 Procesador: Snapdragon 778 5G+
-Android: 12/13
+Conectividad: 4G LTE
+Android: 12/13 (API 31/32)
 Pantalla: 6.78" IPS LCD
 Enfoque: Dispositivos mid-range con recursos limitados
 ```
 
-Aunque fue diseñado para este modelo específico, funciona en cualquier Android 26+ con arquitectura ARM64. Eventualmente puede adaptarse como base para herramientas de monitoreo más especializadas.
+Aunque fue diseñado para este modelo específico, funciona en cualquier dispositivo con API 26+ y arquitectura ARM64. Eventualmente puede adaptarse como base para herramientas de monitoreo más especializadas.
 
 ---
 
@@ -251,7 +256,7 @@ Este proyecto puede evolucionar hacia:
 🔹 Kapt enabled (procesamiento de anotaciones Room)
 🔹 ProGuard/R8 rules aplicadas en release builds
 🔹 Target SDK 34 (últimas APIs de Android)
-🔹 Min SDK 26 (Android 8.0+)
+🔹 Min SDK 26 (API level Android 8.0)
 ```
 
 ---
