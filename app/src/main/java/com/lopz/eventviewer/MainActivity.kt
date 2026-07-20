@@ -1,10 +1,15 @@
 package com.lopz.eventviewer
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.switchMap
@@ -15,6 +20,7 @@ import com.lopz.eventviewer.collector.LogCollectorWorker
 import com.lopz.eventviewer.data.AppDatabase
 import com.lopz.eventviewer.data.EventCategory
 import com.lopz.eventviewer.databinding.ActivityMainBinding
+import com.lopz.eventviewer.util.NotificationHelper
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,10 +42,24 @@ class MainActivity : AppCompatActivity() {
 
     private val selectedFilter = MutableLiveData<EventCategory?>(null)
 
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (!granted) {
+                Toast.makeText(
+                    this,
+                    "Sin ese permiso, no vas a recibir avisos de eventos nuevos",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        NotificationHelper.createChannel(applicationContext)
+        requestNotificationPermissionIfNeeded()
 
         binding.eventsRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.eventsRecyclerView.adapter = adapter
@@ -48,7 +68,6 @@ class MainActivity : AppCompatActivity() {
 
         val dao = AppDatabase.getInstance(applicationContext).systemEventDao()
 
-        // Cada vez que cambia el filtro seleccionado, cambiamos qué query de la DB observamos
         val filteredEvents = selectedFilter.switchMap { category ->
             if (category == null) dao.getAllEvents() else dao.getEventsByCategory(category)
         }
@@ -59,12 +78,26 @@ class MainActivity : AppCompatActivity() {
                 if (events.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
         })
 
-        // Botón de test: dispara la misma recolección que corre automáticamente al bootear,
-        // útil para validar que READ_LOGS esté bien otorgado sin tener que reiniciar el equipo
         binding.btnTestCollect.setOnClickListener {
             val request = OneTimeWorkRequestBuilder<LogCollectorWorker>().build()
             WorkManager.getInstance(applicationContext).enqueue(request)
             Toast.makeText(this, "Recolectando eventos...", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * Desde Android 13 (API 33), mostrar notificaciones requiere permiso explícito
+     * del usuario en tiempo de ejecución, no alcanza con declararlo en el manifest.
+     */
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val granted = ContextCompat.checkSelfPermission(
+                this, Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (!granted) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
         }
     }
 

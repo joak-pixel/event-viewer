@@ -8,6 +8,7 @@ import com.lopz.eventviewer.data.AppDatabase
 import com.lopz.eventviewer.data.EventCategory
 import com.lopz.eventviewer.data.EventSeverity
 import com.lopz.eventviewer.data.SystemEvent
+import com.lopz.eventviewer.util.NotificationHelper
 
 /**
  * Recolecta eventos de dos fuentes:
@@ -51,6 +52,13 @@ class LogCollectorWorker(
             // Evitar duplicados: solo insertamos lo que no existe ya
             val newEvents = events.filter { dao.exists(it.timestamp, it.rawDetails) == 0 }
             dao.insertAll(newEvents)
+
+            if (newEvents.isNotEmpty()) {
+                NotificationHelper.createChannel(applicationContext)
+                NotificationHelper.showNewEventsNotification(applicationContext, newEvents.size)
+            }
+
+            Result.success()
 
             Result.success()
         } catch (e: SecurityException) {
