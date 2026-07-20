@@ -199,11 +199,8 @@ event-viewer/
 ```
 📱 Dispositivo: Moto G60s (Lisbon)
 RAM: 6GB
-Procesador: Snapdragon 778 5G+
-Conectividad: 4G LTE
-Android: 12/13 (API 31/32)
-Pantalla: 6.78" IPS LCD
-Enfoque: Dispositivos mid-range con recursos limitados
+Procesador: MediaTek Helio G95
+Android: 12
 ```
 
 Aunque fue diseñado para este modelo específico, funciona en cualquier dispositivo con API 26+ y arquitectura ARM64. Eventualmente puede adaptarse como base para herramientas de monitoreo más especializadas.
